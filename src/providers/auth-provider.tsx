@@ -1,12 +1,12 @@
 // src/providers/auth-provider.tsx
 "use client";
 
-import { useState, useEffect, useCallback, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import { AuthContext } from '@/contexts/AuthContext';
-import { authService } from '@/services/authService';
-import { tokenUtils } from '@/lib/interceptor';
-import type { User, LoginCredentials } from '@/types/auth';
+import { useState, useEffect, useCallback, ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { AuthContext } from "@/contexts/AuthContext";
+import { authService } from "@/services/authService";
+import { tokenUtils } from "@/libs/interceptor";
+import type { User, LoginCredentials } from "@/types/auth";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -24,7 +24,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const initializeAuth = useCallback(async () => {
     try {
       setIsLoading(true);
-      
+
       if (tokenUtils.isAuthenticated() && !tokenUtils.isTokenExpired()) {
         const userData = await authService.getMe();
         setUser(userData);
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         tokenUtils.clearTokens();
       }
     } catch (error) {
-      console.error('Failed to initialize auth:', error);
+      console.error("Failed to initialize auth:", error);
       tokenUtils.clearTokens();
       setUser(null);
     } finally {
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(authResponse.user);
       return authResponse;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -61,11 +61,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       await authService.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       setUser(null);
       setIsLoading(false);
-      router.push('/login');
+      router.push("/login");
     }
   }, [router]);
 
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const userData = await authService.getMe();
       setUser(userData);
     } catch (error) {
-      console.error('Failed to refresh user:', error);
+      console.error("Failed to refresh user:", error);
       await logout();
     } finally {
       setIsLoading(false);
@@ -91,11 +91,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const handleAuthFailure = () => {
       setUser(null);
-      router.push('/login');
+      router.push("/login");
     };
 
-    window.addEventListener('auth:failure', handleAuthFailure);
-    return () => window.removeEventListener('auth:failure', handleAuthFailure);
+    window.addEventListener("auth:failure", handleAuthFailure);
+    return () => window.removeEventListener("auth:failure", handleAuthFailure);
   }, [router]);
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const validateToken = () => {
       if (tokenUtils.isTokenExpired()) {
-        console.warn('Token expired, logging out user');
+        console.warn("Token expired, logging out user");
         logout();
       }
     };
@@ -123,8 +123,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }

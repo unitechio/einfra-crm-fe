@@ -30,9 +30,14 @@ export default function Loading() {
         </div>
 
         <div className="text-center space-y-3">
-          <h2 className="text-2xl font-semibold text-foreground animate-float">Loading</h2>
+          <h2 className="text-2xl font-semibold text-foreground animate-float">
+            Loading
+          </h2>
           <div className="flex space-x-1">
-            <div className="w-2 h-2 bg-loading-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+            <div
+              className="w-2 h-2 bg-loading-primary rounded-full animate-bounce"
+              style={{ animationDelay: "0ms" }}
+            />
             <div
               className="w-2 h-2 bg-loading-secondary rounded-full animate-bounce"
               style={{ animationDelay: "150ms" }}
@@ -45,10 +50,12 @@ export default function Loading() {
         </div>
 
         <div className="w-64 h-1 bg-muted rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-loading-primary via-loading-secondary to-loading-accent animate-shimmer rounded-full" />
+          <div className="h-full bg-linear-to-r from-loading-primary via-loading-secondary to-loading-accent animate-shimmer rounded-full" />
         </div>
 
-        <p className="text-sm text-muted-foreground animate-pulse">Preparing your experience...</p>
+        <p className="text-sm text-muted-foreground animate-pulse">
+          Preparing your experience...
+        </p>
       </div>
 
       <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-loading-primary/10 rounded-full blur-3xl animate-pulse-glow" />
@@ -57,5 +64,5 @@ export default function Loading() {
         style={{ animationDelay: "1s" }}
       />
     </div>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-import  apiClient  from '@/lib/interceptor'
+import apiClient from "@/libs/interceptor";
 
 export const serverService = {
   getServers: async () => {
-    const response = await apiClient.get('/servers');
+    const response = await apiClient.get("/servers");
     return response.data;
   },
   getServer: async (id: string) => {

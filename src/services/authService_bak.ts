@@ -1,31 +1,31 @@
-import apiClient, { tokenUtils } from '@/lib/interceptor'
-import type { LoginCredentials, User, AuthResponse } from '@/types/auth';
+import apiClient, { tokenUtils } from "@/libs/interceptor";
+import type { LoginCredentials, User, AuthResponse } from "@/types/auth";
 
 export class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await apiClient.post('/auth/login', credentials);
+      const response = await apiClient.post("/auth/login", credentials);
       const authData = response.data;
-      
+
       // Set tokens using utility
       tokenUtils.setTokens({
         token: authData.token,
         refreshToken: authData.refreshToken,
-        expiresIn: authData.expiresIn
+        expiresIn: authData.expiresIn,
       });
-      
+
       return authData;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       throw error;
     }
   }
 
   async logout(): Promise<void> {
     try {
-      await apiClient.post('/auth/logout');
+      await apiClient.post("/auth/logout");
     } catch (error) {
-      console.error('Logout API call failed:', error);
+      console.error("Logout API call failed:", error);
       // Continue with local cleanup even if API fails
     } finally {
       // Always clear local tokens
@@ -35,32 +35,32 @@ export class AuthService {
 
   async getMe(): Promise<User> {
     try {
-      const response = await apiClient.get('/auth/me');
+      const response = await apiClient.get("/auth/me");
       return response.data;
     } catch (error) {
-      console.error('Failed to get user profile:', error);
+      console.error("Failed to get user profile:", error);
       throw error;
     }
   }
 
   async refreshToken(refreshToken: string): Promise<AuthResponse> {
     try {
-      const response = await apiClient.post('/auth/refresh', {
-        refreshToken
+      const response = await apiClient.post("/auth/refresh", {
+        refreshToken,
       });
       return response.data;
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      console.error("Token refresh failed:", error);
       throw error;
     }
   }
 
   async updateProfile(userData: Partial<User>): Promise<User> {
     try {
-      const response = await apiClient.put('/auth/profile', userData);
+      const response = await apiClient.put("/auth/profile", userData);
       return response.data;
     } catch (error) {
-      console.error('Profile update failed:', error);
+      console.error("Profile update failed:", error);
       throw error;
     }
   }
@@ -71,28 +71,28 @@ export class AuthService {
     confirmPassword: string;
   }): Promise<void> {
     try {
-      await apiClient.post('/auth/change-password', data);
+      await apiClient.post("/auth/change-password", data);
     } catch (error) {
-      console.error('Password change failed:', error);
+      console.error("Password change failed:", error);
       throw error;
     }
   }
 
   async resetPassword(email: string): Promise<void> {
     try {
-      await apiClient.post('/auth/reset-password', { email });
+      await apiClient.post("/auth/reset-password", { email });
     } catch (error) {
-      console.error('Password reset failed:', error);
+      console.error("Password reset failed:", error);
       throw error;
     }
   }
 
   async verifyResetToken(token: string): Promise<boolean> {
     try {
-      await apiClient.post('/auth/verify-reset-token', { token });
+      await apiClient.post("/auth/verify-reset-token", { token });
       return true;
     } catch (error) {
-      console.error('Reset token verification failed:', error);
+      console.error("Reset token verification failed:", error);
       return false;
     }
   }
@@ -103,9 +103,9 @@ export class AuthService {
     confirmPassword: string;
   }): Promise<void> {
     try {
-      await apiClient.post('/auth/confirm-reset-password', data);
+      await apiClient.post("/auth/confirm-reset-password", data);
     } catch (error) {
-      console.error('Password reset confirmation failed:', error);
+      console.error("Password reset confirmation failed:", error);
       throw error;
     }
   }
@@ -128,7 +128,8 @@ export class AuthService {
 export const authService = new AuthService();
 
 // Export individual functions for backward compatibility
-export const login = (credentials: LoginCredentials) => authService.login(credentials);
+export const login = (credentials: LoginCredentials) =>
+  authService.login(credentials);
 export const logout = () => authService.logout();
 export const getMe = () => authService.getMe();
 export const refreshToken = (token: string) => authService.refreshToken(token);
