@@ -38,12 +38,18 @@ interface HeaderProps {
   onLogout: () => void;
 }
 
-export function Header({ title, onThemeToggle, isDark, onLogout }: HeaderProps) {
+export function Header({
+  title,
+  onThemeToggle,
+  isDark,
+  onLogout,
+}: HeaderProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const { user } = useAuth();
-  const { notifications, dismissNotification, clearNotifications } = useNotificationStore();
+  const { notifications, dismissNotification, clearNotifications } =
+    useNotificationStore();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -114,10 +120,15 @@ export function Header({ title, onThemeToggle, isDark, onLogout }: HeaderProps) 
           disabled={isRefreshing}
           className="bg-background/50 backdrop-blur-sm border-muted-foreground/20 hover:border-primary/50"
         >
-          <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
+          />
         </Button>
 
-        <DropdownMenu open={isNotificationOpen} onOpenChange={setIsNotificationOpen}>
+        <DropdownMenu
+          open={isNotificationOpen}
+          onOpenChange={setIsNotificationOpen}
+        >
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
@@ -151,10 +162,16 @@ export function Header({ title, onThemeToggle, isDark, onLogout }: HeaderProps) 
                       {getNotificationIcon(notification.type)}
                       <div className="flex-1">
                         <div className="flex justify-between items-center">
-                          <span className="font-medium text-sm">{notification.title}</span>
-                          <span className="text-xs text-muted-foreground">{notification.time}</span>
+                          <span className="font-medium text-sm">
+                            {notification.title}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {notification.time}
+                          </span>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {notification.message}
+                        </p>
                       </div>
                       <Button
                         variant="ghost"
@@ -176,9 +193,13 @@ export function Header({ title, onThemeToggle, isDark, onLogout }: HeaderProps) 
 
             <DropdownMenuSeparator />
             <DropdownMenuItem className="p-0">
-                <Button variant="ghost" className="w-full justify-center" onClick={clearNotifications}>
-                  Clear all notifications
-                </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-center"
+                onClick={clearNotifications}
+              >
+                Clear all notifications
+              </Button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -204,15 +225,21 @@ export function Header({ title, onThemeToggle, isDark, onLogout }: HeaderProps) 
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="/admin-user-avatar.png" alt="Admin" />
-                <AvatarFallback>{user?.username?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                <AvatarFallback>
+                  {user?.username?.charAt(0)?.toUpperCase()}
+                </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.username}</p>
-                <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                <p className="text-sm font-medium leading-none">
+                  {user?.username}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.email}
+                </p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -229,7 +256,10 @@ export function Header({ title, onThemeToggle, isDark, onLogout }: HeaderProps) 
               <span>Help & Support</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onLogout} className="text-red-600 dark:text-red-400">
+            <DropdownMenuItem
+              onClick={onLogout}
+              className="text-red-600 dark:text-red-400"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>
