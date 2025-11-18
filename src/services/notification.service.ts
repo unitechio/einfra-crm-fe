@@ -88,10 +88,8 @@ export class NotificationService {
   }
 }
 
-// --- 3. Export Singleton Instance và Functions ---
 export const notificationService = new NotificationService();
 
-// Export các hàm riêng lẻ
 export const getNotifications = () => notificationService.getNotifications();
 export const markAsRead = (id: string) => notificationService.markAsRead(id);
 export const markAllAsRead = () => notificationService.markAllAsRead();

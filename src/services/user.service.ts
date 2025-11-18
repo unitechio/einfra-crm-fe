@@ -1,7 +1,8 @@
 import axiosClient from "@/libs/interceptor";
 
-// 1. Định nghĩa các Interface (Types) cho dữ liệu
-// (Tốt nhất nên tách ra file riêng như @/types/user.ts nếu dự án lớn)
+// -----------------------------
+// 1. Định nghĩa Types
+// -----------------------------
 export interface User {
   id: string;
   username: string;
@@ -12,7 +13,6 @@ export interface User {
   avatarUrl?: string;
 }
 
-// Interface cho tham số tìm kiếm/phân trang
 export interface UserQueryParams {
   page?: number;
   limit?: number;
@@ -20,7 +20,6 @@ export interface UserQueryParams {
   role?: string;
 }
 
-// Interface cho dữ liệu tạo/sửa user
 export interface CreateUserDto {
   username: string;
   email: string;
@@ -28,41 +27,88 @@ export interface CreateUserDto {
   role: string;
 }
 
-// 2. Các hàm Service
-export const userService = {
-  // Lấy danh sách user (có phân trang & filter)
-  getAll: async (params?: UserQueryParams) => {
-    const { data } = await axiosClient.get<User[]>("/users", { params });
-    return data;
-  },
+// -----------------------------
+// 2. Định nghĩa Class UserService
+// -----------------------------
+export class UserService {
+  private readonly baseUrl = "/users";
 
-  // Lấy chi tiết 1 user theo ID
-  getById: async (id: string) => {
-    const { data } = await axiosClient.get<User>(`/users/${id}`);
-    return data;
-  },
+  async getAll(params?: UserQueryParams): Promise<User[]> {
+    try {
+      const response = await axiosClient.get<User[]>(this.baseUrl, { params });
+      return response.data;
+    } catch (error) {
+      console.error("UserService: Failed to fetch users:", error);
+      throw error;
+    }
+  }
 
-  // Lấy thông tin user đang đăng nhập (Profile)
-  getMe: async () => {
-    const { data } = await axiosClient.get<User>("/users/me");
-    return data;
-  },
+  async getById(id: string): Promise<User> {
+    try {
+      const response = await axiosClient.get<User>(`${this.baseUrl}/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`UserService: Failed to fetch user ${id}:`, error);
+      throw error;
+    }
+  }
 
-  // Tạo user mới
-  create: async (payload: CreateUserDto) => {
-    const { data } = await axiosClient.post<User>("/users", payload);
-    return data;
-  },
+  async getMe(): Promise<User> {
+    try {
+      const response = await axiosClient.get<User>(`${this.baseUrl}/me`);
+      return response.data;
+    } catch (error) {
+      console.error("UserService: Failed to fetch current user:", error);
+      throw error;
+    }
+  }
 
-  // Cập nhật user
-  update: async (id: string, payload: Partial<CreateUserDto>) => {
-    const { data } = await axiosClient.put<User>(`/users/${id}`, payload);
-    return data;
-  },
+  async create(payload: CreateUserDto): Promise<User> {
+    try {
+      const response = await axiosClient.post<User>(this.baseUrl, payload);
+      return response.data;
+    } catch (error) {
+      console.error("UserService: Failed to create user:", error);
+      throw error;
+    }
+  }
 
-  // Xóa user
-  delete: async (id: string) => {
-    const { data } = await axiosClient.delete(`/users/${id}`);
-    return data;
-  },
-};
+  async update(id: string, payload: Partial<CreateUserDto>): Promise<User> {
+    try {
+      const response = await axiosClient.put<User>(
+        `${this.baseUrl}/${id}`,
+        payload,
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`UserService: Failed to update user ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      await axiosClient.delete(`${this.baseUrl}/${id}`);
+    } catch (error) {
+      console.error(`UserService: Failed to delete user ${id}:`, error);
+      throw error;
+    }
+  }
+}
+
+// -----------------------------
+// 3. Export singleton instance + helper functions
+// -----------------------------
+export const userService = new UserService();
+
+export const getUsers = (params?: UserQueryParams) =>
+  userService.getAll(params);
+export const getUserById = (id: string) => userService.getById(id);
+export const getCurrentUser = () => userService.getMe();
+export const createUser = (payload: CreateUserDto) =>
+  userService.create(payload);
+export const updateUser = (id: string, payload: Partial<CreateUserDto>) =>
+  userService.update(id, payload);
+export const deleteUser = (id: string) => userService.delete(id);
+
+export default userService;
