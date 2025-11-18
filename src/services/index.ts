@@ -7,3 +7,5 @@ export * from "./harbor.service";
 export * from "./kubernetes.service";
 export * from "./role.service";
 export * from "./permission.service";
+export * from "./workflow.service";
+export * from "./alert.service";

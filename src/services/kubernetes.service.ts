@@ -1,5 +1,4 @@
 import apiClient from "@/libs/interceptor";
-import type { AxiosResponse } from "axios";
 
 // --- 1. Types (có thể tách ra file riêng) ---
 export interface K8sMetadata {
