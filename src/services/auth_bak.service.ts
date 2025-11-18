@@ -7,7 +7,6 @@ export class AuthService {
       const response = await apiClient.post("/auth/login", credentials);
       const authData = response.data;
 
-      // Set tokens using utility
       tokenUtils.setTokens({
         token: authData.token,
         refreshToken: authData.refreshToken,
@@ -124,10 +123,8 @@ export class AuthService {
   }
 }
 
-// Create singleton instance
 export const authService = new AuthService();
 
-// Export individual functions for backward compatibility
 export const login = (credentials: LoginCredentials) =>
   authService.login(credentials);
 export const logout = () => authService.logout();

@@ -14,6 +14,28 @@ export interface DockerImage {
   size: number;
 }
 
+export interface DockerContainerStats {
+  cpu_stats: {
+    cpu_usage: {
+      total_usage: number;
+      percpu_usage: number[];
+      usage_in_kernelmode: number;
+      usage_in_usermode: number;
+    };
+    system_cpu_usage: number;
+  };
+  memory_stats: {
+    usage: number;
+    max_usage: number;
+    stats: {
+      cache: number;
+      rss: number;
+      pgfault: number;
+      pgmajfault: number;
+    };
+  };
+}
+
 export class DockerService {
   private readonly baseUrl = "/api/docker";
 
@@ -56,6 +78,77 @@ export class DockerService {
     }
   }
 
+  async removeContainer(containerId: string): Promise<void> {
+    try {
+      await apiClient.delete(`${this.baseUrl}/containers/${containerId}`);
+    } catch (error) {
+      console.error(
+        `DockerService: Failed to remove container ${containerId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async inspectContainer(containerId: string): Promise<DockerContainer> {
+    try {
+      const response: AxiosResponse<DockerContainer> = await apiClient.get(
+        `${this.baseUrl}/containers/${containerId}/json`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        `DockerService: Failed to inspect container ${containerId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async getContainerLogs(containerId: string): Promise<string> {
+    try {
+      const response: AxiosResponse<string> = await apiClient.get(
+        `${this.baseUrl}/containers/${containerId}/logs`,
+        {
+          params: {
+            stdout: true,
+            stderr: true,
+            timestamps: true,
+            tail: 100,
+            follow: false,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        `DockerService: Failed to get logs for container ${containerId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async getContainerStats(containerId: string): Promise<DockerContainerStats> {
+    try {
+      const response: AxiosResponse<DockerContainerStats> = await apiClient.get(
+        `${this.baseUrl}/containers/${containerId}/stats`,
+        {
+          params: {
+            stream: false,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        `DockerService: Failed to get stats for container ${containerId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
   // --- Images Management ---
 
   /**
@@ -84,9 +177,91 @@ export class DockerService {
       throw error;
     }
   }
+
+  async pullImage(imageName: string): Promise<void> {
+    try {
+      await apiClient.post(`${this.baseUrl}/images/pull`, {
+        fromImage: imageName,
+      });
+    } catch (error) {
+      console.error(`DockerService: Failed to pull image ${imageName}:`, error);
+      throw error;
+    }
+  }
+
+  async pushImage(imageName: string): Promise<void> {
+    try {
+      await apiClient.post(`${this.baseUrl}/images/push`, {
+        fromImage: imageName,
+      });
+    } catch (error) {
+      console.error(`DockerService: Failed to push image ${imageName}:`, error);
+      throw error;
+    }
+  }
+
+  async tagImage(imageId: string, tag: string): Promise<void> {
+    try {
+      await apiClient.post(`${this.baseUrl}/images/${imageId}/tag`, {
+        tag,
+      });
+    } catch (error) {
+      console.error(
+        `DockerService: Failed to tag image ${imageId} with tag ${tag}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async pruneContainers(): Promise<void> {
+    try {
+      await apiClient.post(`${this.baseUrl}/containers/prune`);
+    } catch (error) {
+      console.error(`DockerService: Failed to prune containers:`, error);
+      throw error;
+    }
+  }
+
+  async pruneImages(): Promise<void> {
+    try {
+      await apiClient.post(`${this.baseUrl}/images/prune`);
+    } catch (error) {
+      console.error(`DockerService: Failed to prune images:`, error);
+      throw error;
+    }
+  }
 }
 
 export const dockerService = new DockerService();
+
+// --- Containers ---
 export const getContainers = () => dockerService.getContainers();
+export const controlContainer = (
+  containerId: string,
+  action: "start" | "stop" | "restart",
+) => dockerService.controlContainer(containerId, action);
+export const removeContainer = (containerId: string) =>
+  dockerService.removeContainer(containerId);
+export const inspectContainer = (containerId: string) =>
+  dockerService.inspectContainer(containerId);
+export const getContainerLogs = (containerId: string) =>
+  dockerService.getContainerLogs(containerId);
+export const getContainerStats = (containerId: string) =>
+  dockerService.getContainerStats(containerId);
+export const pruneContainers = () => dockerService.pruneContainers();
+
+// --- Images ---
 export const getImages = () => dockerService.getImages();
+export const deleteImage = (imageId: string) =>
+  dockerService.deleteImage(imageId);
+export const pullImage = (imageName: string) =>
+  dockerService.pullImage(imageName);
+export const pushImage = (imageName: string) =>
+  dockerService.pushImage(imageName);
+export const tagImage = (imageId: string, tag: string) =>
+  dockerService.tagImage(imageId, tag);
+export const pruneImages = () => dockerService.pruneImages();
+
+// --- Default export ---
 export default dockerService;
