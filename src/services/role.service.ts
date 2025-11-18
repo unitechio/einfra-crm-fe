@@ -98,4 +98,8 @@ export class RoleService {
 export const roleService = new RoleService();
 export const getRoles = () => roleService.getRoles();
 export const createRole = (data: CreateRoleDto) => roleService.createRole(data);
+export const updateRole = (id: string, data: Partial<CreateRoleDto>) =>
+  roleService.updateRole(id, data);
+export const deleteRole = (id: string) => roleService.deleteRole(id);
+
 export default roleService;
