@@ -29,7 +29,62 @@ export interface SystemServiceStatus {
 export class ServerService {
   private readonly baseUrl = "/api/server";
 
-  // --- A. Network Checks ---
+  // --- Core Server Info ---
+  async getServerInfo(serverId: string): Promise<ServerInfo> {
+    try {
+      const response: AxiosResponse<ServerInfo> = await apiClient.get(
+        `${this.baseUrl}/${serverId}/info`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        `ServerService: Failed to get server info for ${serverId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  // --- B. System Service Status ---
+  async getSystemServiceStatus(
+    serverId: string,
+  ): Promise<SystemServiceStatus[]> {
+    try {
+      const response: AxiosResponse<SystemServiceStatus[]> =
+        await apiClient.get(`${this.baseUrl}/${serverId}/system/services`);
+      return response.data;
+    } catch (error) {
+      console.error(
+        `ServerService: Failed to get system service status for ${serverId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  // --- C. Backup Status
+
+  /**
+   * Lấy trạng thái hiện tại của tiến trình sao lưu gần nhất.
+   * @param serverId ID máy chủ
+   */
+
+  async getBackupStatus(serverId: string): Promise<BackupStatus> {
+    try {
+      const response: AxiosResponse<BackupStatus> = await apiClient.get(
+        `${this.baseUrl}/${serverId}/backup/status`,
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        `ServerService: Failed to get backup status for ${serverId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  // --- D. Network Checks ---
 
   /**
    * Kiểm tra độ trễ (latency) đến một địa chỉ IP hoặc Hostname.
@@ -93,25 +148,6 @@ export class ServerService {
     } catch (error) {
       console.error(
         `ServerService: Failed to start backup on ${serverId}:`,
-        error,
-      );
-      throw error;
-    }
-  }
-
-  /**
-   * Lấy trạng thái hiện tại của tiến trình sao lưu gần nhất.
-   * @param serverId ID máy chủ
-   */
-  async getBackupStatus(serverId: string): Promise<BackupStatus> {
-    try {
-      const response: AxiosResponse<BackupStatus> = await apiClient.get(
-        `${this.baseUrl}/${serverId}/backup/status`,
-      );
-      return response.data;
-    } catch (error) {
-      console.error(
-        `ServerService: Failed to get backup status for ${serverId}:`,
         error,
       );
       throw error;
@@ -216,24 +252,64 @@ export class ServerService {
     }
   }
 
-  // --- D. Core Lifecycle (Giữ lại các hàm cũ) ---
-
-  async getServerInfo(serverId: string): Promise<ServerInfo> {
-    /* ... code cũ ... */ throw new Error("Not implemented");
+  async restartServer(serverId: string): Promise<void> {
+    try {
+      await apiClient.post(`${this.baseUrl}/${serverId}/system/start`);
+    } catch (error) {
+      console.error(
+        `ServerService: Failed to start server ${serverId}:`,
+        error,
+      );
+      throw error;
+    }
   }
-  // ... (Bạn nên giữ lại hoặc thay thế các hàm này bằng code hoàn chỉnh trước đó)
+
+  async shutdownServer(serverId: string): Promise<void> {
+    try {
+      await apiClient.post(`${this.baseUrl}/${serverId}/system/shutdown`);
+    } catch (error) {
+      console.error(
+        `ServerService: Failed to shutdown server ${serverId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  // --- D. Core Lifecycle (Giữ lại các hàm cũ) ---
 }
 
 export const serverService = new ServerService();
 
+export const getServerInfo = (serverId: string) =>
+  serverService.getServerInfo(serverId);
 export const checkPing = (serverId: string, target: string) =>
   serverService.checkPing(serverId, target);
+export const checkPortStatus = (
+  serverId: string,
+  target: string,
+  port: number,
+) => serverService.checkPortStatus(serverId, target, port);
+
 export const startBackup = (serverId: string, config: string) =>
   serverService.startBackup(serverId, config);
+export const getBackupStatus = (serverId: string) =>
+  serverService.getBackupStatus(serverId);
+export const restoreBackup = (serverId: string, backupId: string) =>
+  serverService.restoreBackup(serverId, backupId);
+
 export const getServiceStatus = (serverId: string, serviceName: string) =>
   serverService.getServiceStatus(serverId, serviceName);
+export const startService = (serverId: string, serviceName: string) =>
+  serverService.startService(serverId, serviceName);
+export const stopService = (serverId: string, serviceName: string) =>
+  serverService.stopService(serverId, serviceName);
 export const restartService = (serverId: string, serviceName: string) =>
   serverService.restartService(serverId, serviceName);
-// ... (Thêm các hàm export còn lại)
+
+export const restartServer = (serverId: string) =>
+  serverService.restartServer(serverId);
+export const shutdownServer = (serverId: string) =>
+  serverService.shutdownServer(serverId);
 
 export default serverService;
